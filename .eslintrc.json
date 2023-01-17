@@ -1,5 +1,5 @@
 {
-  "extends": ["next/core-web-vitals", "prettier", "airbnb-base"],
+  "extends": ["next/core-web-vitals","prettier", "airbnb-base"],
   "parserOptions": {
     "ecmaVersion": 12
   },
@@ -11,6 +11,7 @@
     "no-console": 0,
     "indent": 0,
     "linebreak-style": 0,
+    "import/no-unresolved": 0,
     "prettier/prettier": [
       "error",
       {
