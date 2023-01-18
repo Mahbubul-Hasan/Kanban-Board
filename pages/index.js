@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable */
 import {
   Box,
@@ -6,13 +7,37 @@ import {
   Container,
   HStack,
   Input,
-  SimpleGrid, Text,
-  VStack
+  SimpleGrid, Text, VStack
 } from '@chakra-ui/react';
 import Head from 'next/head';
+import { useState } from 'react';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { v4 as uuidv4 } from 'uuid';
 /* eslint-enable */
 
 export default function Home() {
+    const tasks = [
+        { id: uuidv4(), label: 'Task 01' },
+        { id: uuidv4(), label: 'Task 02' },
+        { id: uuidv4(), label: 'Task 03' },
+    ];
+    const columns = {
+        [uuidv4()]: {
+            name: 'To do',
+            items: tasks,
+        },
+        [uuidv4()]: {
+            name: 'In Progress',
+            items: [],
+        },
+        [uuidv4()]: {
+            name: 'Done',
+            items: [],
+        },
+    };
+
+    const [status, setStatus] = useState(columns);
+
     return (
         <>
             <Head>
@@ -40,47 +65,61 @@ export default function Home() {
 
                 <Box pt="6">
                     <SimpleGrid columns="3" spacing={10}>
-                        <Box border="1px solid black">
-                            <Text bg="tomato" fontSize="2xl" fontWeight="bold" align="center" p="2">
-                                To Do
-                            </Text>
-
-                            <VStack spacing="4" align="stretch" p="4">
-                                <Text
-                                    bg="blackAlpha.200"
-                                    color="blackAlpha.600"
-                                    fontSize="lg"
-                                    fontWeight="semibold"
-                                    align="center"
-                                    p="2"
-                                    border="1px solid black"
-                                >
-                                    Task 01
-                                </Text>
-                                <Text
-                                    bg="blackAlpha.200"
-                                    color="blackAlpha.600"
-                                    fontSize="lg"
-                                    fontWeight="semibold"
-                                    align="center"
-                                    p="2"
-                                    border="1px solid black"
-                                >
-                                    Task 01
-                                </Text>
-                                <Text
-                                    bg="blackAlpha.200"
-                                    color="blackAlpha.600"
-                                    fontSize="lg"
-                                    fontWeight="semibold"
-                                    align="center"
-                                    p="2"
-                                    border="1px solid black"
-                                >
-                                    Task 01
-                                </Text>
-                            </VStack>
-                        </Box>
+                        <DragDropContext onDragEnd={(result) => console.log(result)}>
+                            {Object?.entries(status)?.map(([columnId, column], index) => {
+                                console.log('🚀 ~ columnId', column);
+                                return (
+                                    <Box border="1px solid black" key={columnId}>
+                                        <Text
+                                            bg="tomato"
+                                            fontSize="2xl"
+                                            fontWeight="bold"
+                                            align="center"
+                                            p="2"
+                                        >
+                                            {column?.name}
+                                        </Text>
+                                        <Droppable droppableId={columnId}>
+                                            {(dropProvided, dropSnapshot) => (
+                                                <Box
+                                                    {...dropProvided.droppableProps}
+                                                    ref={dropProvided.innerRef}
+                                                >
+                                                    <VStack spacing="4" align="stretch" p="4">
+                                                        {column?.items?.map((item, index) => (
+                                                            <Draggable
+                                                                draggableId={item.id}
+                                                                key={item.id}
+                                                                index={index}
+                                                            >
+                                                                {(dragProvided, dragSnapshot) => (
+                                                                    <Text
+                                                                        bg="blackAlpha.200"
+                                                                        color="blackAlpha.600"
+                                                                        fontSize="lg"
+                                                                        fontWeight="semibold"
+                                                                        align="center"
+                                                                        p="2"
+                                                                        border="1px solid black"
+                                                                        key={item.id}
+                                                                        ref={dragProvided.innerRef}
+                                                                        {...dragProvided.draggableProps}
+                                                                        {...dragProvided.dragHandleProps}
+                                                                    >
+                                                                        {item.label}
+                                                                    </Text>
+                                                                )}
+                                                            </Draggable>
+                                                        ))}
+                                                        {dropProvided.placeholder}
+                                                    </VStack>
+                                                </Box>
+                                            )}
+                                        </Droppable>
+                                    </Box>
+                                );
+                            })}
+                        </DragDropContext>
                     </SimpleGrid>
                 </Box>
             </Container>
