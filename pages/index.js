@@ -13,65 +13,52 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useState } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
-// import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 /* eslint-enable */
 
 // eslint-disable-next-line import/extensions
 const ColumnComponent = dynamic(() => import('@/components/ColumnComponent'), { ssr: false });
 
-// const tasks = [
-//     { id: uuidv4(), label: 'Task 01' },
-//     { id: uuidv4(), label: 'Task 02' },
-//     { id: uuidv4(), label: 'Task 03' },
-// ];
-// const columns = {
-//     [uuidv4()]: {
-//         name: 'To do',
-//         items: tasks,
-//     },
-//     [uuidv4()]: {
-//         name: 'In Progress',
-//         items: [],
-//     },
-//     [uuidv4()]: {
-//         name: 'Done',
-//         items: [],
-//     },
-// };
-const tasks = [
-    { id: 'task-01', label: 'Task 01' },
-    { id: 'task-02', label: 'Task 02' },
-    { id: 'task-03', label: 'Task 03' },
-];
-const columns = {
-    'column-01': {
-        name: 'To do',
-        items: tasks,
-    },
-    'column-02': {
-        name: 'In Progress',
-        items: [],
-    },
-    'column-03': {
-        name: 'Done',
-        items: [],
-    },
-};
-
 export default function Home() {
+    const initialTasks = [
+        { id: uuidv4(), label: 'Task 01' },
+        { id: uuidv4(), label: 'Task 02' },
+        { id: uuidv4(), label: 'Task 03' },
+    ];
+    const columns = {
+        'column-01': {
+            name: 'To do',
+            items: initialTasks,
+        },
+        'column-02': {
+            name: 'In Progress',
+            items: [],
+        },
+        'column-03': {
+            name: 'Done',
+            items: [],
+        },
+    };
+
     const [status, setStatus] = useState(columns);
+    const [tasks, setTasks] = useState(initialTasks);
+    const [newTask, setNewTask] = useState('');
 
     const onDragEnd = (result) => {
         const { source, destination } = result;
 
         if (!destination) return;
 
+        if (destination.droppableId === source.droppableId && destination.index === source.index) {
+            return;
+        }
+
         if (source.droppableId !== destination.droppableId) {
             const sourceColumn = status[source.droppableId];
-            const destColumn = status[destination.droppableId];
+            const destinationColumn = status[destination.droppableId];
 
             const sourceItems = [...sourceColumn.items];
-            const destItems = [...destColumn.items];
+            const destItems = [...destinationColumn.items];
 
             const [removed] = sourceItems.splice(source.index, 1);
             destItems.splice(destination.index, 0, removed);
@@ -83,7 +70,7 @@ export default function Home() {
                     items: sourceItems,
                 },
                 [destination.droppableId]: {
-                    ...destColumn,
+                    ...destinationColumn,
                     items: destItems,
                 },
             });
@@ -103,6 +90,13 @@ export default function Home() {
         }
     };
 
+    const handleOnSubmit = (event) => {
+        event.preventDefault();
+        tasks.push({ id: uuidv4(), label: newTask });
+        setTasks(tasks);
+        setNewTask('');
+    };
+
     return (
         <>
             <Head>
@@ -111,18 +105,32 @@ export default function Home() {
 
             <Container maxW="7xl" p="4" overflow="hidden">
                 <Center h="40px" color="white">
-                    <HStack spacing="4">
-                        <Input
-                            placeholder="Write your task ..."
-                            borderRadius="none"
-                            border="1px solid black"
-                        />
-                        <Button borderRadius="none" px="8" border="1px solid black" bg="white">
-                            <Text color="red.500" fontWeight="semibold">
-                                Add
-                            </Text>
-                        </Button>
-                    </HStack>
+                    <form onSubmit={handleOnSubmit}>
+                        <HStack spacing="4">
+                            <Input
+                                placeholder="Write your task ..."
+                                borderRadius="none"
+                                border="1px solid black"
+                                color="blackAlpha.600"
+                                ontSize="lg"
+                                fontWeight="semibold"
+                                name="task"
+                                value={newTask}
+                                onChange={(e) => setNewTask(e.target.value)}
+                            />
+                            <Button
+                                type="submit"
+                                borderRadius="none"
+                                px="8"
+                                border="1px solid black"
+                                bg="white"
+                            >
+                                <Text color="red.500" fontWeight="semibold">
+                                    Add
+                                </Text>
+                            </Button>
+                        </HStack>
+                    </form>
                 </Center>
 
                 <Box pt="6">
