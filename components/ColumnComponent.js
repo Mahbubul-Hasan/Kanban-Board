@@ -1,7 +1,5 @@
-/* eslint-disable */
 import { Box, Text, VStack } from '@chakra-ui/react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
-/* eslint-enable */
 
 export default function ColumnComponent({ columnId, column }) {
     return (
@@ -34,6 +32,7 @@ export default function ColumnComponent({ columnId, column }) {
                                 </Draggable>
                             ))}
                         </VStack>
+                        {droppableProvided.placeholder}
                     </Box>
                 )}
             </Droppable>
